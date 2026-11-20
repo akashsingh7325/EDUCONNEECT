@@ -1,0 +1,11 @@
+import { useEffect, useState } from "react";
+import { getAdminAnalytics } from "../services/adminApi";
+
+export default function Analytics() {
+  const [data, setData] = useState(null); const [error, setError] = useState("");
+  useEffect(() => { getAdminAnalytics().then((body) => setData(body.data)).catch((err) => setError(err.message)); }, []);
+  if (error) return <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">{error}</div>;
+  if (!data) return <div className="rounded-2xl border border-slate-200 bg-white p-8 text-slate-500">Loading analytics...</div>;
+  const a = data.analytics; const cards = [["Users", a.users],["Courses", a.courses],["Enrollments", a.enrollments],["Published books", a.publishedBooks],["Admissions", a.admissions]];
+  return <div className="space-y-6 text-left"><div><p className="text-sm font-bold text-indigo-600">Reports</p><h1 className="m-0 mt-1 text-3xl font-black text-slate-950">Analytics</h1><p className="mt-2 text-sm text-slate-500">Live database totals and catalogue activity.</p></div><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">{cards.map(([label,value]) => <article key={label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p className="text-sm font-semibold text-slate-500">{label}</p><p className="mt-2 text-3xl font-black text-slate-950">{Number(value||0).toLocaleString()}</p></article>)}</div><section className="rounded-2xl border border-slate-200 bg-white p-6"><h2 className="m-0 text-lg font-black">Popular courses</h2><div className="mt-4 space-y-3">{a.popularCourses?.length ? a.popularCourses.map((course) => <div key={course.id} className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3"><span className="text-sm font-bold text-slate-800">{course.title}</span><span className="text-sm text-slate-500">{course._count?.enrollments||0} enrollments</span></div>) : <p className="py-8 text-center text-sm text-slate-400">No courses available.</p>}</div></section><section className="rounded-2xl border border-amber-200 bg-amber-50 p-5"><h2 className="m-0 text-lg font-black text-amber-900">Revenue</h2><p className="mt-2 text-sm text-amber-800">{data.revenue?.message}</p></section></div>;
+}
